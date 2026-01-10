@@ -18,5 +18,25 @@ app.get('/api/quotes', async (req, res) => {
   }
 });
 
+app.post('/api/quotes', async (req, res) => {
+  const { quote, character } = req.body;
+
+  if (!quote || !character) {
+    return res.status(400).json({ error: 'Both quote and character are required' });
+  }
+
+  try {
+    const [newQuote] = await knex('quotes')
+      .insert({ quote, character })
+      .returning('*'); 
+
+    res.status(201).json(newQuote);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add quote' });
+  }
+});
+
+
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
